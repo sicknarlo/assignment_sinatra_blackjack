@@ -42,11 +42,12 @@ class BlackJack
   def hand_value(hand)
 
     value = 0
-
+    aces = 0
     hand.each do |card|
       if ROYALS.include?(card[1])
         value += 10
-      elsif card[1] = 'A'
+      elsif card[1] == 'A'
+        aces += 1
         if value + 11 > 21
           value += 1
         else
@@ -54,6 +55,11 @@ class BlackJack
         end
       else
         value += card[1]
+      end
+    end
+    if value > 21 || aces > 0
+      until value <= 21 || aces == 0
+        value -= 10
       end
     end
     value
@@ -109,6 +115,7 @@ class BlackJack
       @dealer_hand<<deal
       dealer_value = hand_value(@dealer_hand)
     end
+    game_over(dealer_value, player_value)
   end
 
 
