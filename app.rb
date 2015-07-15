@@ -41,19 +41,20 @@ post '/blackjack/hit' do
   #gamestate = [cards, player hand, dealer hand]
   @gamestate = cookies["gamestate"]
 
-  # binding.pry
+  binding.pry
   game = BlackJack.new(JSON.parse(@gamestate))
   game.hit
   @player_hand = game.player_hand
   @player_value = game.hand_value(@player_hand)
-  if @value > 21
-    @value = "BUST"
+  if @player_value > 21
+    @player_value = "BUST"
   else
-    @value
+    @player_value
   end
   @dealer_hand = game.dealer_hand
-  @gamestate = (game.update_game_state).to_json
-  
+  # @gamestate = (game.update_game_state).to_json
+  @gamestate = ([game.cards, @player_hand, @dealer_hand]).to_json
+
   cookies["gamestate"] = @gamestate
 
   erb :blackjack_hit
@@ -67,7 +68,7 @@ get '/blackjack/stay' do
   game = BlackJack.new(JSON.parse(@gamestate))
   @player_value = game.hand_value(@player_hand)
   @dealer_value = game.hand_value(@dealer_hand)
-  
+
 
 end
 
