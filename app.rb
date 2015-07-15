@@ -3,10 +3,7 @@ require "./blackjack.rb"
 require "sinatra/cookies"
 require 'json'
 require 'pry'
-
-# Root url
-
-
+require '/helpers/helpers.rb'
 
 # helper do
 
@@ -25,6 +22,7 @@ get '/blackjack' do
 
   game = BlackJack.new([])
   @player_hand = game.player_hand
+  @dealer_hand = game.dealer_hand
   
   # binding.pry 
   
@@ -43,15 +41,28 @@ post '/blackjack/hit' do
 
   # binding.pry
   game = BlackJack.new(JSON.parse(@gamestate))
-  game.hit
+
+  choice = params[:player_action]
   @player_hand = game.player_hand
   @player_value = game.hand_value(@player_hand)
-  if @value > 21
-    @value = "BUST"
-  else
-    @value
-  end
   @dealer_hand = game.dealer_hand
+  @dealer_value = game.hand_value(@dealer_hand)
+
+  if choice == "stay"
+    redirect to("blackjack/stay")
+  else
+    game.hit
+    @player_hand = game.player_hand
+    @player_value = game.hand_value(@player_hand)
+    @dealer_hand = game.dealer_hand
+    @dealer_value = game.hand_value(@dealer_hand)
+    if @player_value > 21
+      @player_value = "BUST"
+    else
+      @player_value
+    end
+    @dealer_hand = game.dealer_hand
+  end
   @gamestate = (game.update_game_state).to_json
   
   cookies["gamestate"] = @gamestate
@@ -65,9 +76,14 @@ get '/blackjack/stay' do
   @gamestate = cookies["gamestate"]
 
   game = BlackJack.new(JSON.parse(@gamestate))
+  @player_hand = game.player_hand
+  @dealer_hand = game.dealer_hand
+
   @player_value = game.hand_value(@player_hand)
   @dealer_value = game.hand_value(@dealer_hand)
+  @outcome = game.dealer_playout
   
+  erb :blackjack_stay
 
 end
 
