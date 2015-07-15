@@ -22,18 +22,16 @@ end
 get '/blackjack' do
 
   #gamestate = [cards, player hand, dealer hand]
-  request.cookies["gamestate"]
+  # gamestate = request.cookies["gamestate"]
+  # cookies[:gamestate] = nil
+  gamestate = nil
+  game = BlackJack.new
+  player = game.player
+  dealer = game.dealer
 
-  game = BlackJack.new(JSON.parse(gamestate))
-  player = Player.new(game.game_state[1])
-  dealer = Player.new(game.game_state[2])
-
-  # game.shuffle
-  @player_hand = pl
-  @dealer_hand = game.deal
 
   gamestate = (game.update_game_state(game.cards, player.hand, dealer.hand)).to_json
-  response.cookies("gamestate",gamestate)
+  response.set_cookie("gamestate",gamestate)
 
   erb :blackjack 
 
@@ -42,18 +40,23 @@ end
 post '/blackjack' do
 
   #gamestate = [cards, player hand, dealer hand]
-  request.cookies["gamestate"]
+  gamestate = request.cookies["gamestate"]
 
   game = BlackJack.new(JSON.parse(gamestate))
-  player = Player.new(game.game_state[1])
-  dealer = Player.new(game.game_state[2])
+  player = game.player
+  dealer = game.dealer
+
 
   player_choice = params[:player_action]
 
-  player.hit(game.deal) if player_choice = "hit"
+  player.hit(game.deal) if player_choice == "hit"
+
+  @value = player.hand_value
 
   gamestate = (game.update_game_state(game.cards, player.hand, dealer.hand)).to_json
   response.cookies("gamestate",gamestate)
+
+  erb :blackjack
 
 end
   

@@ -2,6 +2,8 @@ class Player
 
   ROYALS = %W[K Q J]
 
+  attr_accessor :hand
+
   def initialize(hand)
     @hand = hand
   end

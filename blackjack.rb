@@ -1,18 +1,29 @@
+require './player'
 
 class BlackJack
 
+  attr_accessor :player, :dealer, :cards
   #can intialize with saved gamestate
-  def initialize(game_state = [])
-    @game_state = JSON.parse(game_state)
-
+  def initialize(game_state=nil)
+    
     #creates new game
-    if @game_state.empty?
+    if game_state.nil?
       create_card_deck
       shuffle
+      initial_deal
+    else
+      @game_state = game_state
+      @player = Player.new([@game_state[1]])
+      @dealer = Player.new([@game_state[2]])
     end
 
   end
 
+
+  def initial_deal
+    @player = Player.new([deal, deal])
+    @dealer =Player.new([deal, deal])
+  end
   #this will save in a session
   # Jsonify
   def update_game_state(cards, player_hand, dealer_hand)
