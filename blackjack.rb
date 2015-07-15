@@ -2,32 +2,37 @@ require './player'
 
 class BlackJack
 
-  attr_accessor :player, :dealer, :cards
+  attr_accessor :player_hand, :dealer_hand, :cards
   #can intialize with saved gamestate
-  def initialize(game_state=nil)
+  def initialize(game_state)
+    @player_hand = []
+    @dealer_hand = []
     
     #creates new game
-    if game_state.nil?
+    if game_state.empty?
       create_card_deck
       shuffle
       initial_deal
     else
       @game_state = game_state
-      @player = Player.new([@game_state[1]])
-      @dealer = Player.new([@game_state[2]])
+      @player_hand = @game_state[0][1]
+      @dealer_hand = @game_state[2]
+      @cards = game_state[0]
     end
 
   end
 
-
   def initial_deal
-    @player = Player.new([deal, deal])
-    @dealer =Player.new([deal, deal])
+    @player_hand << deal
+    @player_hand << deal
+    @dealer_hand << deal
+    @dealer_hand << deal
   end
+
   #this will save in a session
   # Jsonify
-  def update_game_state(cards, player_hand, dealer_hand)
-    @game_state = [cards, player_hand, dealer_hand]
+  def update_game_state
+    @game_state = [@cards, @player_hand, @dealer_hand]
   end
 
   def create_card_deck
@@ -40,7 +45,11 @@ class BlackJack
   end
 
   def deal
-    card = @cards.pop
+    @cards.pop
+  end
+
+  def hit
+    @player_hand << deal
   end
 
 end

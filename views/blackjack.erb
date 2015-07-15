@@ -1,8 +1,6 @@
-<h2>Player</h2>
-<%= @player_hand %>
-<%= @value %>
-<button name="player_action" value="hit">Hit</button>
-<button name="player_action" value="stay">Stay</button>
+<h1><%= @player_hand %></h1>
 
-<h2>Dealer</h2>
-<%= @dealer_hand %>
+
+<h2>Player</h2>
+<form action="blackjack/hit" method="post"><button name="player_action" value="hit" >Hit</button></form>
+<form><button name="player_action" value="stay">Stay</button></form>

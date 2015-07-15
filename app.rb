@@ -1,5 +1,6 @@
 require "sinatra"
 require "./blackjack.rb"
+require "sinatra/cookies"
 require 'json'
 
 # Root url
@@ -24,39 +25,31 @@ get '/blackjack' do
   #gamestate = [cards, player hand, dealer hand]
   # gamestate = request.cookies["gamestate"]
   # cookies[:gamestate] = nil
-  gamestate = nil
-  game = BlackJack.new
-  player = game.player
-  dealer = game.dealer
-
-
-  gamestate = (game.update_game_state(game.cards, player.hand, dealer.hand)).to_json
-  response.set_cookie("gamestate",gamestate)
+  # gamestate = cookies["gamestate"]
+  game = BlackJack.new([])
+  @player_hand = game.player_hand
+  
+  gamestate = (game.update_game_state).to_json
+  # response.set_cookie("gamestate",gamestate)
+  cookies["gamestate"] = gamestate
 
   erb :blackjack 
 
 end
 
-post '/blackjack' do
+post '/blackjack/hit' do
 
   #gamestate = [cards, player hand, dealer hand]
-  gamestate = request.cookies["gamestate"]
+  @gamestate = cookies["gamestate"]
 
-  game = BlackJack.new(JSON.parse(gamestate))
-  player = game.player
-  dealer = game.dealer
+  game = BlackJack.new([JSON.parse(@gamestate)])
+  game.hit
+  @player_hand = game.player_hand
+  @dealer_hand = game.dealer_hand
+  @gamestate = (game.update_game_state).to_json
+  
+  cookies["gamestate"] = @gamestate
 
-
-  player_choice = params[:player_action]
-
-  player.hit(game.deal) if player_choice == "hit"
-
-  @value = player.hand_value
-
-  gamestate = (game.update_game_state(game.cards, player.hand, dealer.hand)).to_json
-  response.cookies("gamestate",gamestate)
-
-  erb :blackjack
+  erb :blackjack_hit
 
 end
-  
