@@ -3,7 +3,7 @@ class BlackJack
 
   #can intialize with saved gamestate
   def initialize(game_state = [])
-    @game_state = game_state
+    @game_state = JSON.parse(game_state)
 
     #creates new game
     if @game_state.empty?
@@ -15,8 +15,8 @@ class BlackJack
 
   #this will save in a session
   # Jsonify
-  def update_game_state(player_hand, dealer_hand)
-    @game_state = [@cards, player_hand, dealer_hand]
+  def update_game_state(cards, player_hand, dealer_hand)
+    @game_state = [cards, player_hand, dealer_hand]
   end
 
   def create_card_deck
