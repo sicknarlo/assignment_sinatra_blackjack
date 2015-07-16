@@ -17,13 +17,21 @@ get '/' do
 end
 
 get '/blackjack' do
+  if cookies["bankroll"].nil?
+    @bankroll = 1000
+  else
+    @bankroll = cookies["bankroll"].to_i
+  end
 
   game = BlackJack.new([])
+
+  @bankroll -= 10
 
   update_player_hands(game)
   
   gamestate = (game.update_game_state).to_json
 
+  cookies["bankroll"] = @bankroll
   cookies["gamestate"] = gamestate
 
   erb :blackjack 
@@ -34,6 +42,7 @@ post '/blackjack/hit' do
 
   #gamestate = [cards, player hand, dealer hand]
   @gamestate = cookies["gamestate"]
+  @bankroll = cookies["bankroll"].to_i
 
   game = BlackJack.new(JSON.parse(@gamestate))
 
@@ -48,9 +57,12 @@ post '/blackjack/hit' do
     update_player_hands(game)
     @player_value = player_bust?(@player_value)
   end
+
+
   @gamestate = (game.update_game_state).to_json
   
   cookies["gamestate"] = @gamestate
+  cookies["bankroll"] = @bankroll
 
   erb :blackjack_hit
 
@@ -59,6 +71,7 @@ end
 get '/blackjack/stay' do
 
   @gamestate = cookies["gamestate"]
+  @bankroll = cookies["bankroll"].to_i
 
   game = BlackJack.new(JSON.parse(@gamestate))
   update_player_hands(game)
@@ -68,7 +81,12 @@ get '/blackjack/stay' do
   # @player_value = game.hand_value(@player_hand)
   # @dealer_value = game.hand_value(@dealer_hand)
   @outcome = game.dealer_playout
-  
+
+  unless @outcome.include?("Dealer Wins")
+    @bankroll += 20
+  end
+
+  cookies["bankroll"] = @bankroll
   erb :blackjack_stay
 
 end
