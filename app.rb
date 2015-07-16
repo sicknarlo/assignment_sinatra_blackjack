@@ -7,7 +7,6 @@ require './helpers/helpers.rb'
 
 helpers UpdateHands
 
-
 get '/' do 
 
   "<h1>Hello, world</h1>"
@@ -48,23 +47,26 @@ post '/blackjack/hit' do
 
   choice = params[:player_action]
 
+  #updates player/dealer card values
   update_player_hands(game)
 
   if choice == "stay"
     redirect to("blackjack/stay")
   else
+    #hit adds random card to player's card hand
     game.hit
     update_player_hands(game)
+    #if player busts, updates player value to "BUST"
     @player_value = player_bust?(@player_value)
+    redirect to("blackjack/stay") if @player_value == "BUST"
   end
-
 
   @gamestate = (game.update_game_state).to_json
   
   cookies["gamestate"] = @gamestate
   cookies["bankroll"] = @bankroll
 
-  erb :blackjack_hit
+  erb :blackjack
 
 end
 
@@ -75,15 +77,14 @@ get '/blackjack/stay' do
 
   game = BlackJack.new(JSON.parse(@gamestate))
   update_player_hands(game)
-  # @player_hand = game.player_hand
-  # @dealer_hand = game.dealer_hand
 
-  # @player_value = game.hand_value(@player_hand)
-  # @dealer_value = game.hand_value(@dealer_hand)
-  @outcome = game.dealer_playout
-
-  unless @outcome.include?("Dealer Wins")
-    @bankroll += 20
+  if game.hand_value(@player_hand) > 21
+    @outcome = "Player Busts"
+  else
+    @outcome = game.dealer_playout
+    unless @outcome.include?("Dealer Wins")
+      @bankroll += 20
+    end
   end
 
   cookies["bankroll"] = @bankroll
